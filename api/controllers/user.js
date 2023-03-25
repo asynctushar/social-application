@@ -7,7 +7,7 @@ exports.getUser = catchAsyncErrors(async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    if(!user) {
+    if (!user) {
         return next(new ErrorHandler("User not found", 404));
     }
 
@@ -18,16 +18,17 @@ exports.getUser = catchAsyncErrors(async (req, res, next) => {
 })
 
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
-    const { name, email, city, website } = req.body;
+    const { name, email, city, website, password } = req.body;
 
     const user = await User.findByIdAndUpdate(req.user.id, {
         $set: {
             name,
             email,
             city,
-            website
+            website,
+            password
         }
-    }, { new: true , runValidators: true})
+    }, { new: true, runValidators: true })
 
     res.status(200).json({
         success: true,

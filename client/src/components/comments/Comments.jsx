@@ -1,45 +1,52 @@
-import { useContext, useState } from "react";
 import "./comments.scss";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { makeRequest } from "../../axios";
+import { useEffect, useState } from "react";
 import moment from "moment";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
+import { setError } from "../../redux/slices/appSlice";
+import axios from "axios";
 
 const Comments = ({ postId }) => {
     const [desc, setDesc] = useState("");
     const { user } = useSelector(state => state.userState);
+    const [comments, setComments] = useState([]);
+    const dispatch = useDispatch();
 
-    const { isLoading, error, data } = useQuery(["comments"], () =>
-        makeRequest.get(process.env.REACT_APP_API_URL + "/comments?postId=" + postId).then((res) => {
-            return res.data;
-        })
-    );
 
-    const queryClient = useQueryClient();
+    useEffect(() => {
+        const getComments = async () => {
+            try {
+                const { data } = await axios.get(process.env.REACT_APP_API_URL + `/api/v1/post/${postId}/comment`, { withCredentials: true });
 
-    const mutation = useMutation(
-        (newComment) => {
-            return makeRequest.post(process.env.REACT_APP_API_URL +"/comments", newComment);
-        },
-        {
-            onSuccess: () => {
-                // Invalidate and refetch
-                queryClient.invalidateQueries(["comments"]);
-            },
+                setComments(data.comments)
+            } catch (err) {
+                dispatch(setError(err.response.data.message));
+            }
         }
-    );
 
-    const handleClick = async (e) => {
+        getComments();
+
+    }, []);
+
+
+    const addComment = async (e) => {
         e.preventDefault();
-        mutation.mutate({ desc, postId });
-        setDesc("");
+        if (desc.length < 1) return dispatch(setError("Please add description"));
+
+        try {
+            const { data } = await axios.post(process.env.REACT_APP_API_URL + `/api/v1/post/${postId}/comment`, {desc}, { withCredentials: true });
+
+            setComments(data.comments);
+            setDesc("")
+        } catch (err) {
+            dispatch(setError(err.response.data.message))
+        }
     };
 
     return (
         <div className="comments">
             <div className="write">
-                <Link to={"/profile/" + user.id} >
+                <Link to={"/profile/" + user._id} >
                     <img src={user.profilePic} alt={user.profilePic} />
                 </Link>
                 <input
@@ -48,29 +55,25 @@ const Comments = ({ postId }) => {
                     value={desc}
                     onChange={(e) => setDesc(e.target.value)}
                 />
-                <button onClick={handleClick}>Send</button>
+                <button onClick={addComment}>Comment</button>
             </div>
-            {error
-                ? "Something went wrong"
-                : isLoading
-                    ? "loading"
-                    : data.map((comment) => (
-                        <div className="comment" key={comment.id}>
-                            <Link to={"/profile/" + comment.userid} >
-                                <img src={comment.profilePic} alt={comment.profilePic} />
-                            </Link>
+            {comments?.map((comment) => (
+                <div className="comment" key={comment._id}>
+                    <Link to={"/profile/" + comment.userId._id} >
+                        <img src={comment.profilePic} alt={comment.profilePic} />
+                    </Link>
 
-                            <div className="info">
-                                <Link to={"/profile/" + comment.userid} >
-                                    <span>{comment.name}</span>
-                                </Link>
-                                <p>{comment.desc}</p>
-                            </div>
-                            <span className="date">
-                                {moment(comment.createdAt).fromNow()}
-                            </span>
-                        </div>
-                    ))}
+                    <div className="info">
+                        <Link to={"/profile/" + comment.userId._id} >
+                            <span>{comment.userId.name}</span>
+                        </Link>
+                        <p>{comment.desc}</p>
+                    </div>
+                    <span className="date">
+                        {moment(comment.createdAt).fromNow()}
+                    </span>
+                </div>
+            ))}
         </div>
     );
 };

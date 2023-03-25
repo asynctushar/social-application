@@ -3,49 +3,30 @@ import Image from "../../assets/img.png";
 import Map from "../../assets/map.png";
 import Friend from "../../assets/friend.png";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { makeRequest } from "../../axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { setError } from "../../redux/slices/appSlice";
+import { setPost } from "../../redux/slices/postSlice";
 
 const Share = () => {
-    const [file, setFile] = useState(null);
     const [desc, setDesc] = useState("");
     const { user } = useSelector(state => state.userState);
-    const queryClient = useQueryClient();
-
-    const upload = async () => {
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            const res = await makeRequest.post(process.env.REACT_APP_API_URL + "/upload", formData);
-            return res.data;
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
-
-
-    const mutation = useMutation(
-        (newPost) => {
-            return makeRequest.post(process.env.REACT_APP_API_URL + "/posts", newPost);
-        },
-        {
-            onSuccess: () => {
-                // Invalidate and refetch
-                queryClient.invalidateQueries(["posts"]);
-            },
-        }
-    );
+    const dispatch = useDispatch();
 
     const handleClick = async (e) => {
         e.preventDefault();
-        let imgUrl = "";
-        if (file) imgUrl = await upload();
-        mutation.mutate({ desc, img: imgUrl });
-        setDesc("");
-        setFile(null);
+
+        if (desc.length < 1) return dispatch(setError("Please add post description"));
+
+        try {
+            const { data } = await axios.post(process.env.REACT_APP_API_URL + "/api/v1/post/new", { desc }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
+
+            dispatch(setPost(data.post));
+        } catch (err) {
+            dispatch(setError(err.response.data.message));
+        }
+
     };
 
     return (
@@ -53,20 +34,20 @@ const Share = () => {
             <div className="container">
                 <div className="top">
                     <div className="left">
-                        <Link to={"/profile/" + user.id} >
+                        <Link to={"/profile/" + user._id} >
                             <img src={user.profilePic} alt={user.profilePic} />
                         </Link>
                         <input
                             type="text"
-                            placeholder={`What's on your mind ${user.name}?`}
+                            placeholder={`What's on your mind ${user?.name}?`}
                             onChange={(e) => setDesc(e.target.value)}
                             value={desc}
                         />
                     </div>
                     <div className="right">
-                        {file && (
+                        {/* {file && (
                             <img className="file" alt="" src={URL.createObjectURL(file)} />
-                        )}
+                        )} */}
                     </div>
                 </div>
                 <hr />
@@ -76,7 +57,7 @@ const Share = () => {
                             type="file"
                             id="file"
                             style={{ display: "none" }}
-                            onChange={(e) => setFile(e.target.files[0])}
+                        // onChange={(e) => setFile(e.target.files[0])}
                         />
                         <label htmlFor="file">
                             <div className="item">

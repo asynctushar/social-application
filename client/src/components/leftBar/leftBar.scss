@@ -71,6 +71,14 @@ a {
           span {
             font-size: 14px;
           }
+
+          .logout {
+            cursor: pointer;
+            text-align: center;
+            color: crimson;
+            margin-left: 1rem;
+            margin-bottom: 2rem;
+          }
         }
       }
     }

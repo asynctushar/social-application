@@ -1,32 +1,42 @@
 import { useState } from "react";
+import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from "react-router-dom";
+import { setError } from '../../redux/slices/appSlice';
+import { setUser, setLoader, setIsAuthenticated } from '../../redux/slices/userSlice';
 import "./register.scss";
 import axios from "axios";
 
 const Register = () => {
-    const [inputs, setInputs] = useState({
-        username: "",
-        email: "",
-        password: "",
-        name: "",
-    });
-    const [err, setErr] = useState(null);
-    const navigate = useNavigate()
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const handleChange = (e) => {
-        setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
 
     const handleClick = async (e) => {
         e.preventDefault();
 
+        if (password !== confirmPassword) {
+            return dispatch(setError("Password doesn't match"))
+        }
+
+        if (password.length < 8) {
+            return dispatch(setError("Password must be atleast 8 character"))
+        }
 
         try {
-            await axios.post(process.env.REACT_APP_API_URL + "/api/auth/register", inputs);
+            dispatch(setLoader(true))
+            const { data } = await axios.post(process.env.REACT_APP_API_URL + "/api/v1/register", { name, email, password }, { headers: { "Content-Type": "application/json" },withCredentials: true });
 
-            navigate("/")
+            dispatch(setUser(data.user));
+            dispatch(setIsAuthenticated(true));
+            dispatch(setLoader(false));
+            navigate("/");
         } catch (err) {
-            setErr(err.response.data);
+            dispatch(setError(err.response.data.message));
+            dispatch(setLoader(false))
         }
     };
 
@@ -45,33 +55,36 @@ const Register = () => {
                 </div>
                 <div className="right">
                     <h1>Register</h1>
-                    <form>
+                    <form  onSubmit={handleClick}>
                         <input
                             type="text"
-                            placeholder="Username"
-                            name="username"
-                            onChange={handleChange}
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
                         />
                         <input
                             type="email"
                             placeholder="Email"
-                            name="email"
-                            onChange={handleChange}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                         <input
                             type="password"
                             placeholder="Password"
-                            name="password"
-                            onChange={handleChange}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                         <input
-                            type="text"
-                            placeholder="Name"
-                            name="name"
-                            onChange={handleChange}
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
                         />
-                        {err && err}
-                        <button onClick={handleClick}>Register</button>
+                        <button disabled={email.length < 1 || password.length < 1 || name.length < 1 || confirmPassword.length < 1} >Register</button>
                     </form>
                 </div>
             </div>

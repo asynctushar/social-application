@@ -12,25 +12,42 @@ import Messages from "../../assets/10.png";
 import Tutorials from "../../assets/11.png";
 import Courses from "../../assets/12.png";
 import Fund from "../../assets/13.png";
-import { useSelector } from "react-redux";
-import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from 'react-router-dom';
+import { setError } from "../../redux/slices/appSlice";
+import { setIsAuthenticated, setUser } from "../../redux/slices/userSlice";
+import axios from 'axios';
 
 const LeftBar = () => {
     const { user } = useSelector(state => state.userState);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logoutHandler = async () => {
+        try {
+            await axios.get(process.env.REACT_APP_API_URL + '/api/v1/logout', { withCredentials: true });
+
+            dispatch(setUser(null));
+            dispatch(setIsAuthenticated(false));
+            navigate("/login");
+        } catch (err) {
+            dispatch(setError(err.response.data.message));
+        }
+    }
 
     return (
         <div className="leftBar">
             <div className="container">
                 <div className="menu">
                     <div className="user">
-                        <Link to={"/profile/" + user.id} >
+                        <Link to={"/profile/" + user?._id} >
                             <img
                                 src={user.profilePic}
                                 alt={user.profilePic}
                             />
                         </Link>
-                        <Link to={"/profile/" + user.id} >
-                            <span>{user.name}</span>
+                        <Link to={"/profile/" + user?._id} >
+                            <span>{user?.name}</span>
                         </Link>
                     </div>
                     <div className="item">
@@ -92,6 +109,9 @@ const LeftBar = () => {
                     <div className="item">
                         <img src={Courses} alt="" />
                         <span>Courses</span>
+                    </div>
+                    <div className="item">
+                        <p className="logout" onClick={logoutHandler}>Log out</p>
                     </div>
                 </div>
             </div>

@@ -9,118 +9,157 @@ import LanguageIcon from "@mui/icons-material/Language";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Posts from "../../components/posts/Posts";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { makeRequest } from "../../axios";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Update from "../../components/update/Update";
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { setError } from "../../redux/slices/appSlice";
+import LeftBar from "../../components/leftBar/LeftBar";
+import Navbar from "../../components/navbar/Navbar";
+import RightBar from "../../components/rightBar/RightBar";
+import Loader from "../../components/loader/Loader";
 
 const Profile = () => {
     const [openUpdate, setOpenUpdate] = useState(false);
-    const { user } = useSelector(state => state.userState);
-    const userId = parseInt(useLocation().pathname.split("/")[2]);
+    const [user, setUser] = useState(null);
+    const [isFollowed, setIsFollowed] = useState(null);
+    const { user: ownUser } = useSelector(state => state.userState);
+    const [isLoading, setIsLoading] = useState(true);
+    const { id } = useParams();
+    const dispatch = useDispatch();
 
-    const { isLoading, data } = useQuery(["user"], () =>
-        axios.get(process.env.REACT_APP_API_URL + "/api/users/find/" + userId, { withCredentials: true }).then((res) => {
-            return res.data;
-        })
-    );
 
-    const { isLoading: rIsLoading, data: relationshipData } = useQuery(
-        ["relationship"],
-        () =>
-            makeRequest.get(process.env.REACT_APP_API_URL + "/relationships?followedUserId=" + userId).then((res) => {
-                return res.data;
-            })
-    );
+    useEffect(() => {
+        if (id === ownUser._id) {
+            setUser(ownUser);
+            setIsLoading(false);
+        } else {
+            const getUser = async () => {
+                try {
+                    const { data } = await axios.get(process.env.REACT_APP_API_URL + `/api/v1/user/${id}`, { withCredentials: true });
 
-    const queryClient = useQueryClient();
+                    setUser(data.user);
+                    setIsLoading(false);
+                } catch (err) {
+                    dispatch(setError(err.response.data.message));
+                    setIsLoading(false);
+                }
+            }
 
-    const mutation = useMutation(
-        (following) => {
-            if (following)
-                return makeRequest.delete("/relationships?userId=" + userId);
-            return makeRequest.post(process.env.REACT_APP_API_URL + "/relationships", { userId });
-        },
-        {
-            onSuccess: () => {
-                // Invalidate and refetch
-                queryClient.invalidateQueries(["relationship"]);
-            },
+            getUser();
         }
-    );
+    }, [id, dispatch, ownUser]);
 
-    const handleFollow = () => {
-        mutation.mutate(relationshipData.includes(user.id));
+    useEffect(() => {
+        if (user && user._id !== ownUser._id) {
+            const getRelationship = async () => {
+                try {
+                    const { data } = await axios.get(process.env.REACT_APP_API_URL + `/api/v1/relationship/${id}`, { withCredentials: true });
+
+                    setIsFollowed(data.isFollowed);
+                } catch (err) {
+                    dispatch(setError(err.response.data.message));
+                }
+            }
+
+            getRelationship();
+        }
+
+    }, [user, ownUser, dispatch])
+
+    const handleFollow = async () => {
+        try {
+            const { data } = await axios.post(process.env.REACT_APP_API_URL + `/api/v1/relationship/${id}`, {}, { withCredentials: true });
+
+            setIsFollowed(data.isFollowed);
+        } catch (err) {
+            console.log(err)
+            dispatch(setError(err.response.data.message));
+        }
+    };
+
+    const handleUnFollow = async () => {
+        try {
+            const { data } = await axios.delete(process.env.REACT_APP_API_URL + `/api/v1/relationship/${id}`, { withCredentials: true });
+
+            setIsFollowed(data.isFollowed);
+        } catch (err) {
+            dispatch(setError(err.response.data.message));
+        }
     };
 
 
     return (
-        <div className="profile">
-            {isLoading ? (
-                "loading"
-            ) : (
-                <>
-                    <div className="images">
-                        <img src={data.coverPic} alt="" className="cover" />
-                        <img src={ data.profilePic} alt="" className="profilePic" />
-                    </div>
-                    <div className="profileContainer">
-                        <div className="uInfo">
-                            <div className="left">
-                                <a href="http://facebook.com">
-                                    <FacebookTwoToneIcon fontSize="large" />
-                                </a>
-                                <a href="http://facebook.com">
-                                    <InstagramIcon fontSize="large" />
-                                </a>
-                                <a href="http://facebook.com">
-                                    <TwitterIcon fontSize="large" />
-                                </a>
-                                <a href="http://facebook.com">
-                                    <LinkedInIcon fontSize="large" />
-                                </a>
-                                <a href="http://facebook.com">
-                                    <PinterestIcon fontSize="large" />
-                                </a>
+        <>
+            <Navbar />
+            <div style={{ display: "flex" }}>
+                <LeftBar />
+                <div style={{ flex: 6 }}>
+                    {isLoading ? <Loader /> : (
+                        <div className="profile">
+                            <div className="images">
+                                <img src={user?.coverPic} alt="" className="cover" />
+                                <img src={user?.profilePic} alt="" className="profilePic" />
                             </div>
-                            <div className="center">
-                                <span>{data.name}</span>
-                                <div className="info">
-                                    <div className="item">
-                                        <PlaceIcon />
-                                        <span>{data.city}</span>
+                            <div className="profileContainer">
+                                <div className="uInfo">
+                                    <div className="left">
+                                        <a href="http://facebook.com">
+                                            <FacebookTwoToneIcon fontSize="large" />
+                                        </a>
+                                        <a href="http://facebook.com">
+                                            <InstagramIcon fontSize="large" />
+                                        </a>
+                                        <a href="http://facebook.com">
+                                            <TwitterIcon fontSize="large" />
+                                        </a>
+                                        <a href="http://facebook.com">
+                                            <LinkedInIcon fontSize="large" />
+                                        </a>
+                                        <a href="http://facebook.com">
+                                            <PinterestIcon fontSize="large" />
+                                        </a>
                                     </div>
-                                    <div className="item">
-                                        <LanguageIcon />
-                                        <span>{data.website}</span>
+                                    <div className="center">
+                                        <span>{user?.name}</span>
+                                        <div className="info">
+                                            <div className="item">
+                                                <PlaceIcon />
+                                                <span>{user?.city}</span>
+                                            </div>
+                                            <div className="item">
+                                                <LanguageIcon />
+                                                <span>{user?.website}</span>
+                                            </div>
+                                        </div>
+                                        {ownUser?._id === user?._id ? (
+                                            <button onClick={() => setOpenUpdate(true)}>update</button>
+                                        ) : (isFollowed ? (
+                                            <button onClick={handleUnFollow}>
+                                                Unfollow
+                                            </button>
+                                        ) : (
+                                            <button onClick={handleFollow}>
+                                                Follow
+                                            </button>
+                                        )
+                                        )}
+                                    </div>
+                                    <div className="right">
+                                        <EmailOutlinedIcon />
+                                        <MoreVertIcon />
                                     </div>
                                 </div>
-                                {rIsLoading ? (
-                                    "loading"
-                                ) : userId === user.id ? (
-                                    <button onClick={() => setOpenUpdate(true)}>update</button>
-                                ) : (
-                                    <button onClick={handleFollow}>
-                                        {relationshipData.includes(user.id)
-                                            ? "Following"
-                                            : "Follow"}
-                                    </button>
-                                )}
+                                <Posts userId={user?._id} />
                             </div>
-                            <div className="right">
-                                <EmailOutlinedIcon />
-                                <MoreVertIcon />
-                            </div>
+                            {openUpdate && <Update setOpenUpdate={setOpenUpdate} user={ownUser} />}
                         </div>
-                        <Posts userId={userId} />
-                    </div>
-                </>
-            )}
-            {openUpdate && <Update setOpenUpdate={setOpenUpdate} user={data} />}
-        </div>
+                    )}
+                </div >
+                <RightBar />
+            </div>
+        </>
     );
 };
 

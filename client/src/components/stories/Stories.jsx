@@ -1,27 +1,26 @@
 import "./stories.scss";
-import { useQuery } from "@tanstack/react-query";
-import { makeRequest } from "../../axios";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const Stories = () => {
     const { user } = useSelector(state => state.userState);
 
-    const { isLoading, error, data } = useQuery(["stories"], () =>
-        makeRequest.get(process.env.REACT_APP_API_URL +"/stories").then((res) => {
-            return res.data;
-        })
-    );
+    useEffect(() => {
+        const getStories = async () => {
 
-    //TODO Add story using react-query mutations and use upload function.
+        }
+
+        getStories();
+    }, [])
 
     return (
         <div className="stories">
             <div className="story">
-                <img src={ user.profilePic} alt={user.profilePic} />
+                <img src={user.profilePic} alt={user.profilePic} />
                 <span>{user.name}</span>
                 <button>+</button>
             </div>
-            {error
+            {/* {error
                 ? "Something went wrong"
                 : isLoading
                     ? "loading"
@@ -30,7 +29,7 @@ const Stories = () => {
                             <img src={story.img} alt="" />
                             <span>{story.name}</span>
                         </div>
-                    ))}
+                    ))} */}
         </div>
     );
 };

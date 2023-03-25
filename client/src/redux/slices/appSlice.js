@@ -26,9 +26,6 @@ const appSlice = createSlice({
         // },
         // clearSuccess: (state, action) => {
         //     state.success = undefined;
-        // },
-        // setAdminbar: (state, action) => {
-        //     state.isAdminbarOpen = action.payload;
         // }
     }
 });

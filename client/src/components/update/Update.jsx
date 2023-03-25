@@ -1,60 +1,57 @@
+import "./update.scss";
 import { useEffect, useState } from "react";
 import axios from 'axios';
-import "./update.scss";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useDispatch } from "react-redux";
 import { setUser } from '../../redux/slices/userSlice';
+import { setError } from "../../redux/slices/appSlice";
 
 const Update = ({ setOpenUpdate, user }) => {
     const [cover, setCover] = useState("");
     const [profile, setProfile] = useState("");
-    const [texts, setTexts] = useState({
-        email: user.email,
-        password: user.password,
-        name: user.name,
-        city: user.city,
-        website: user.website,
-    });
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [website, setWebsite] = useState("");
+    const [city, setCity] = useState("");
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
-    const upload = async (file) => {
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            const res = await axios.post(process.env.REACT_APP_API_URL + "/api/upload", formData);
-            return res.data;
-        } catch (err) {
-            console.log(err);
-        }
-    };
+    useEffect(() => {
+        setName(user.name);
+        setEmail(user.email);
+        setWebsite(user.website ? user.website : "");
+        setCity(user.city ? user.city : "");
+    }, [user])
 
-    const handleChange = (e) => {
-        setTexts((prev) => ({ ...prev, [e.target.name]: [e.target.value] }));
-    };
-
-
-    const handleClick = async (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
+        let tempPassword = undefined;
 
-        let coverUrl;
-        let profileUrl;
-        coverUrl = cover ? await upload(cover) : user.coverPic;
-        profileUrl = profile ? await upload(profile) : user.profilePic;
+        if (password.length > 0) {
+            if (password.length < 8) return dispatch(setError("Password must be minimum of 8 characters"));
 
-        const {data} = await axios.put(process.env.REACT_APP_API_URL + "/api/users",{ ...texts, coverPic: coverUrl, profilePic: profileUrl });
+            tempPassword = password;
+        }
 
-        dispatch(setUser(data))
-        setOpenUpdate(false);
-        setCover(null);
-        setProfile(null);
+        try {
+            setIsLoading(true);
+            const { data } = await axios.put(process.env.REACT_APP_API_URL + "/api/v1/me", { name, email, password: tempPassword, website, city }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
 
+            dispatch(setUser(data.user));
+            setIsLoading(false);
+            setOpenUpdate(false)
+        } catch (err) {
+            console.log(err)
+            dispatch(setError(err.response.data.message));
+            setIsLoading(false)
+        }
     }
     return (
         <div className="update">
             <div className="wrapper">
                 <h1>Update Your Profile</h1>
-                <form>
+                <form onSubmit={handleUpdate}>
                     <div className="files">
                         <label htmlFor="cover">
                             <span>Cover Picture</span>
@@ -63,7 +60,7 @@ const Update = ({ setOpenUpdate, user }) => {
                                     src={
                                         cover
                                             ? URL.createObjectURL(cover)
-                                            :  user.coverPic
+                                            : user.coverPic
                                     }
                                     alt=""
                                 />
@@ -99,40 +96,36 @@ const Update = ({ setOpenUpdate, user }) => {
                     </div>
                     <label>Email</label>
                     <input
-                        type="text"
-                        value={texts.email}
+                        type="email"
+                        value={email}
                         name="email"
-                        onChange={handleChange}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <label>Password</label>
                     <input
-                        type="text"
-                        value={texts.password}
-                        name="password"
-                        onChange={handleChange}
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                     <label>Name</label>
                     <input
                         type="text"
-                        value={texts.name}
-                        name="name"
-                        onChange={handleChange}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                     />
                     <label>Country / City</label>
                     <input
                         type="text"
-                        name="city"
-                        value={texts.city}
-                        onChange={handleChange}
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
                     />
                     <label>Website</label>
                     <input
                         type="text"
-                        name="website"
-                        value={texts.website}
-                        onChange={handleChange}
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
                     />
-                    <button onClick={handleClick}>Update</button>
+                    <button disabled={isLoading}>Update</button>
                 </form>
                 <button className="close" onClick={() => setOpenUpdate(false)}>
                     close

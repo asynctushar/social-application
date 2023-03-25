@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     website: {
         type: String,
     },
-    City: {
+    city: {
         type: String,
     }
 }, { timestamps: true });

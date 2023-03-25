@@ -79,6 +79,10 @@
                     font-weight: bold;
                     cursor: pointer;
                 }
+
+                button:disabled {
+                    cursor: not-allowed;
+                }
             }
         }
     }
@@ -90,6 +94,8 @@
         height: max-content;
 
         .card {
+            width: 100%;
+            border-radius: 0;
             flex-direction: column;
 
             .left {

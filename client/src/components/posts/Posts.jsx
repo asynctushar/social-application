@@ -1,25 +1,48 @@
-import Post from "../post/Post";
 import "./posts.scss";
-import { useQuery } from "@tanstack/react-query";
-import { makeRequest } from "../../axios";
+import { useSelector, useDispatch } from "react-redux";
+import { setError } from "../../redux/slices/appSlice";
+import { setLoader, setPosts } from "../../redux/slices/postSlice";
+import Post from "../post/Post";
+import Loader from '../loader/Loader';
+import axios from "axios";
+import { useEffect } from "react";
 
-const Posts = ({userId}) => {
-  const { isLoading, error, data } = useQuery(["posts"], () =>
-    makeRequest.get(process.env.REACT_APP_API_URL + userId ? "/posts?userId="+userId : "/posts").then((res) => {
-      return res.data;
-    })
-  );
-    
+const Posts = ({ userId }) => {
+    const dispatch = useDispatch();
+    const { isLoading, posts } = useSelector((state) => state.postState)
 
-  return (
-    <div className="posts">
-      {error
-        ? "Something went wrong!"
-        : isLoading
-        ? "loading"
-        : data?.slice().reverse().map((post) => <Post post={post} key={post.id} />)}
-    </div>
-  );
+    useEffect(() => {
+        const getPosts = async () => {
+            try {
+                dispatch(setLoader(true))
+                const { data } = await axios.get(process.env.REACT_APP_API_URL + '/api/v1/posts', { withCredentials: true });
+
+                if (userId) {
+                    const posts = data.posts.filter(post => post.userId === userId);
+                    dispatch(setPosts(posts));
+                } else {
+                    dispatch(setPosts(data.posts));
+                }
+                dispatch(setLoader(false));
+            } catch (err) {
+                dispatch(setError(err.response.data.message));
+                dispatch(setLoader(false))
+            }
+        }
+
+        getPosts();
+
+    }, [userId]);
+
+    return (
+        <div className="posts">
+            {isLoading ? <Loader /> : (
+                [...posts].reverse().map((post) => (
+                    <Post post={post} key={post._id} />
+                ))
+            )}
+        </div>
+    );
 };
 
 export default Posts;

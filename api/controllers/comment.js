@@ -10,8 +10,7 @@ exports.getComments = catchAsyncErrors(async (req, res, next) => {
 
     const comments = await Comment.find({
         postId: post.id
-    });
-
+    }).populate("userId");
 
     res.status(200).json({
         success: true,
@@ -22,21 +21,25 @@ exports.getComments = catchAsyncErrors(async (req, res, next) => {
 
 exports.addComment = catchAsyncErrors(async (req, res, next) => {
     const desc = req.body.desc;
-    if (!desc) return next(new ErrorHandler("Pkease add description", 400));
+    if (!desc) return next(new ErrorHandler("Please add description", 400));
 
     const post = await Post.findById(req.params.postId);
     if (!post) return next(new ErrorHandler("Post not found", 404));
 
-    const comment = await Comment.create({
+    await Comment.create({
         postId: post.id,
         desc,
         userId: req.user.id
     });
 
+    const comments = await Comment.find({
+        postId: post.id
+    }).populate("userId");
+
 
     res.status(200).json({
         success: true,
-        comment
+        comments
     })
 })
 

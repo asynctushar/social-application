@@ -3,7 +3,7 @@ const ErrorHandler = require('../utils/errorHandler');
 const Post = require("../models/Post.js");
 
 exports.getPosts = catchAsyncErrors( async (req, res) => {
-    const posts = await Post.find();
+    const posts = await Post.find().populate("userId");
 
     res.status(201).json({
         success: true,
@@ -18,7 +18,9 @@ exports.addPost = catchAsyncErrors(async (req, res, next) => {
     const post = await Post.create({
         desc,
         userId: req.user.id
-    });
+    })
+
+    await post.populate("userId");
 
     res.status(201).json({
         success: true,

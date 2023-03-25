@@ -7,7 +7,9 @@ exports.getLikes = catchAsyncErrors(async (req, res, next) => {
     const post = await Post.findById(req.params.id);
     if (!post) return next(new ErrorHandler("Post not found", 404));
 
-    const likes = await Like.find();
+    const likes = await Like.find({
+        postId: post.id
+    });
 
     res.status(201).json({
         success: true,
@@ -23,29 +25,45 @@ exports.addLike = catchAsyncErrors(async (req, res, next) => {
         postId: post.id,
         userId: req.user.id
     });
+
     if (isLiked) return next(new ErrorHandler("Post already liked", 404));
 
-    const like = await Like.create({
+
+    await Like.create({
         postId: post.id,
         userId: req.user.id
     })
 
+    const likes = await Like.find({
+        postId: post.id
+    });
+
     res.status(201).json({
         success: true,
-        like
+        likes
     })
 })
 
 exports.deleteLike = catchAsyncErrors(async (req, res, next) => {
-    const like = await Like.findById(req.params.id);
+    const post = await Post.findById(req.params.id);
+    if (!post) return next(new ErrorHandler("Post not found", 404));
 
-    if (!like) return next(new ErrorHandler("Like not found", 404));
-    if (like.userId.toString() !== req.user.id) return next(new ErrorHandler("Not authorized to unlike", 404));
+    const like = await Like.findOne({
+        postId: post.id,
+        userId: req.user.id
+    });
+
+    if (!like) return next(new ErrorHandler("Post wasn't liked", 404));
 
     await like.deleteOne();
 
+    const likes = await Like.find({
+        postId: post.id
+    });
+
     res.status(201).json({
         success: true,
-        message: "Unliked post"
+        message: "Unliked post",
+        likes
     })
 })

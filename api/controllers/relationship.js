@@ -42,14 +42,14 @@ exports.addRelationship = catchAsyncErrors(async (req, res, next) => {
     })
     if (isFollowed) return next(new ErrorHandler("User already followed", 400));
 
-    const relationship = await Relationship.create({
+    await Relationship.create({
         followedId,
         followerId: req.user.id
     });
 
     res.status(201).json({
         success: true,
-        relationship
+        isFollowed: true
     })
 })
 
@@ -70,7 +70,8 @@ exports.deleteRelationship = catchAsyncErrors(async (req, res, next) => {
 
     res.status(201).json({
         success: true,
-        message: "Relationship deleted"
+        message: "Relationship deleted",
+        isFollowed: false
     })
 
 })
