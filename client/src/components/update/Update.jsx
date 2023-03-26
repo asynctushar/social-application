@@ -26,25 +26,39 @@ const Update = ({ setOpenUpdate, user }) => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        let tempPassword = undefined;
 
-        if (password.length > 0) {
-            if (password.length < 8) return dispatch(setError("Password must be minimum of 8 characters"));
+        if (password && password.length < 8) return dispatch(setError("Password must be minimum of 8 characters"));
 
-            tempPassword = password;
+
+        const formData = new FormData();
+
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('city', city);
+        formData.append('website', website);
+
+        if (profile) {
+            formData.append('profilePic', profile);
+        }
+
+        if (cover) {
+            formData.append('coverPic', cover);
+        }
+
+        if (password) {
+            formData.append('password', password);
         }
 
         try {
             setIsLoading(true);
-            const { data } = await axios.put(process.env.REACT_APP_API_URL + "/api/v1/me", { name, email, password: tempPassword, website, city }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
+            const { data } = await axios.put(process.env.REACT_APP_API_URL + "/api/v1/me", formData, { headers: { "Content-Type": "multipart/form-data" }, withCredentials: true });
 
             dispatch(setUser(data.user));
             setIsLoading(false);
             setOpenUpdate(false)
         } catch (err) {
-            console.log(err)
+            setIsLoading(false);
             dispatch(setError(err.response.data.message));
-            setIsLoading(false)
         }
     }
     return (
@@ -60,7 +74,7 @@ const Update = ({ setOpenUpdate, user }) => {
                                     src={
                                         cover
                                             ? URL.createObjectURL(cover)
-                                            : user.coverPic
+                                            : user.coverPic?.url
                                     }
                                     alt=""
                                 />
@@ -69,6 +83,7 @@ const Update = ({ setOpenUpdate, user }) => {
                         </label>
                         <input
                             type="file"
+                            accept="image/*"
                             id="cover"
                             style={{ display: "none" }}
                             onChange={(e) => setCover(e.target.files[0])}
@@ -80,7 +95,7 @@ const Update = ({ setOpenUpdate, user }) => {
                                     src={
                                         profile
                                             ? URL.createObjectURL(profile)
-                                            : user.profilePic
+                                            : user.profilePic?.url
                                     }
                                     alt=""
                                 />
@@ -90,6 +105,7 @@ const Update = ({ setOpenUpdate, user }) => {
                         <input
                             type="file"
                             id="profile"
+                            accept="image/*"
                             style={{ display: "none" }}
                             onChange={(e) => setProfile(e.target.files[0])}
                         />

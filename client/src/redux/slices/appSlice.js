@@ -20,16 +20,16 @@ const appSlice = createSlice({
             const darkMode = state.darkMode;
             state.darkMode = !darkMode;
             localStorage.setItem("darkMode", !darkMode);
+        },
+        setSuccess: (state, action) => {
+            state.success = action.payload;
+        },
+        clearSuccess: (state, action) => {
+            state.success = undefined;
         }
-        // setSuccess: (state, action) => {
-        //     state.success = action.payload;
-        // },
-        // clearSuccess: (state, action) => {
-        //     state.success = undefined;
-        // }
     }
 });
 
-export const { setError, clearError, toggleDarkMode} = appSlice.actions;
+export const { setError, clearError, toggleDarkMode, setSuccess, clearSuccess} = appSlice.actions;
 
 export default appSlice.reducer;

@@ -11,19 +11,30 @@ import { setPost } from "../../redux/slices/postSlice";
 
 const Share = () => {
     const [desc, setDesc] = useState("");
+    const [file, setFile] = useState(null);
     const { user } = useSelector(state => state.userState);
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleClick = async (e) => {
         e.preventDefault();
-
         if (desc.length < 1) return dispatch(setError("Please add post description"));
 
+        const formData = new FormData();
+        formData.append('desc', desc);
+
+        if (file) {
+            formData.append('post', file);
+        }
+
         try {
-            const { data } = await axios.post(process.env.REACT_APP_API_URL + "/api/v1/post/new", { desc }, { headers: { "Content-Type": "application/json" }, withCredentials: true });
+            setIsLoading(true)
+            const { data } = await axios.post(process.env.REACT_APP_API_URL + "/api/v1/post/new", formData, { headers: { "Content-Type": "multipart/form-data" }, withCredentials: true });
 
             dispatch(setPost(data.post));
+            setIsLoading(false)
         } catch (err) {
+            setIsLoading(false);
             dispatch(setError(err.response.data.message));
         }
 
@@ -35,7 +46,7 @@ const Share = () => {
                 <div className="top">
                     <div className="left">
                         <Link to={"/profile/" + user._id} >
-                            <img src={user.profilePic} alt={user.profilePic} />
+                            <img src={user.profilePic?.url} alt={user.profilePic?.url} />
                         </Link>
                         <input
                             type="text"
@@ -45,19 +56,21 @@ const Share = () => {
                         />
                     </div>
                     <div className="right">
-                        {/* {file && (
+                        {file && (
                             <img className="file" alt="" src={URL.createObjectURL(file)} />
-                        )} */}
+                        )}
                     </div>
                 </div>
                 <hr />
                 <div className="bottom">
                     <div className="left">
                         <input
+                            disabled={isLoading}
                             type="file"
                             id="file"
                             style={{ display: "none" }}
-                        // onChange={(e) => setFile(e.target.files[0])}
+                            accept="image/*"
+                            onChange={(e) => setFile(e.target.files[0])}
                         />
                         <label htmlFor="file">
                             <div className="item">
@@ -75,7 +88,7 @@ const Share = () => {
                         </div>
                     </div>
                     <div className="right">
-                        <button onClick={handleClick}>Share</button>
+                        <button onClick={handleClick} disabled={isLoading}>Share</button>
                     </div>
                 </div>
             </div>

@@ -18,7 +18,7 @@ const Posts = ({ userId }) => {
                 const { data } = await axios.get(process.env.REACT_APP_API_URL + '/api/v1/posts', { withCredentials: true });
 
                 if (userId) {
-                    const posts = data.posts.filter(post => post.userId === userId);
+                    const posts = data.posts.filter(post => post.userId._id === userId);
                     dispatch(setPosts(posts));
                 } else {
                     dispatch(setPosts(data.posts));

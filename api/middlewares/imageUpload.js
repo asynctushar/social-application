@@ -1,11 +1,13 @@
 const multer = require('multer');
 const ErrorHandler = require('../utils/errorHandler');
+
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 30000000
     },
     fileFilter: (req, file, cb) => {
+
         if (file.mimetype.startsWith('image')) {
             cb(null, true)
         } else {
@@ -16,5 +18,6 @@ const upload = multer({
 
 const singleImage = (imageType) => upload.single(imageType);
 const multipleImage = (imageType) => upload.array(imageType, 5);
+const anyImage = () => upload.any();
 
-module.exports = { singleImage, multipleImage }
+module.exports = { singleImage, multipleImage, anyImage }

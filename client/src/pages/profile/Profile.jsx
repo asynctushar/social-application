@@ -19,6 +19,7 @@ import LeftBar from "../../components/leftBar/LeftBar";
 import Navbar from "../../components/navbar/Navbar";
 import RightBar from "../../components/rightBar/RightBar";
 import Loader from "../../components/loader/Loader";
+import Share from '../../components/share/Share';
 
 const Profile = () => {
     const [openUpdate, setOpenUpdate] = useState(false);
@@ -99,8 +100,8 @@ const Profile = () => {
                     {isLoading ? <Loader /> : (
                         <div className="profile">
                             <div className="images">
-                                <img src={user?.coverPic} alt="" className="cover" />
-                                <img src={user?.profilePic} alt="" className="profilePic" />
+                                <img src={user?.coverPic?.url} alt="" className="cover" />
+                                <img src={user?.profilePic?.url} alt="" className="profilePic" />
                             </div>
                             <div className="profileContainer">
                                 <div className="uInfo">
@@ -113,12 +114,6 @@ const Profile = () => {
                                         </a>
                                         <a href="http://facebook.com">
                                             <TwitterIcon fontSize="large" />
-                                        </a>
-                                        <a href="http://facebook.com">
-                                            <LinkedInIcon fontSize="large" />
-                                        </a>
-                                        <a href="http://facebook.com">
-                                            <PinterestIcon fontSize="large" />
                                         </a>
                                     </div>
                                     <div className="center">
@@ -151,6 +146,9 @@ const Profile = () => {
                                         <MoreVertIcon />
                                     </div>
                                 </div>
+                                {ownUser?._id === user?._id && (
+                                    <Share />
+                                )}
                                 <Posts userId={user?._id} />
                             </div>
                             {openUpdate && <Update setOpenUpdate={setOpenUpdate} user={ownUser} />}

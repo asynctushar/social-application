@@ -6,7 +6,7 @@
         top: 0;
         left: 0;
         width: 100vw;
-        height: max-content;
+        height: 100vh;
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
@@ -36,6 +36,7 @@
             h1 {
                 color: lightgrey;
                 margin-top: -1rem;
+                text-align: center;
 
                 @include mobile {
                     font-size: 20px;
@@ -52,6 +53,7 @@
                     display: flex;
                     flex-wrap: wrap;
                     gap: 50px;
+                    margin: 6rem auto;
                 }
 
                 label {
@@ -97,6 +99,7 @@
                     cursor: pointer;
                     color: white;
                     background-color: #5271ff;
+                    margin-top: 6rem;
                 }
 
                 button:disabled {

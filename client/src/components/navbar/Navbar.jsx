@@ -43,8 +43,8 @@ const Navbar = () => {
                 <div className="user">
                     <Link to={"/profile/" + user?._id} >
                         <img
-                            src={user?.profilePic}
-                            alt={user.profilePic}
+                            src={user?.profilePic?.url}
+                            alt={user.profilePic?.url}
                         />
                     </Link>
                     <Link to={"/profile/" + user?._id} >

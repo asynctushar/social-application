@@ -47,7 +47,7 @@ const Comments = ({ postId }) => {
         <div className="comments">
             <div className="write">
                 <Link to={"/profile/" + user._id} >
-                    <img src={user.profilePic} alt={user.profilePic} />
+                    <img src={user.profilePic?.url} alt={user.profilePic?.url} />
                 </Link>
                 <input
                     type="text"
@@ -60,7 +60,7 @@ const Comments = ({ postId }) => {
             {comments?.map((comment) => (
                 <div className="comment" key={comment._id}>
                     <Link to={"/profile/" + comment.userId._id} >
-                        <img src={comment.profilePic} alt={comment.profilePic} />
+                        <img src={comment.userId.profilePic?.url} alt={comment.userId.profilePic?.url} />
                     </Link>
 
                     <div className="info">

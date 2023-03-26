@@ -6,10 +6,10 @@ const postSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    images: [{
+    images: {
         public_id: String,
         url: String
-    }],
+    },
     userId: {
         type: mongoose.Types.ObjectId,
         required: true,

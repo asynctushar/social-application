@@ -74,9 +74,9 @@ const Post = ({ post }) => {
                 <div className="user">
                     <div className="userInfo">
                         <Link
-                            to={`/profile/${post?.userId}`}
+                            to={`/profile/${post?.userId._id}`}
                         >
-                            <img src={post.profilePic} alt={post.profilePic} />
+                            <img src={post.userId.profilePic?.url} alt={post.userId.profilePic?.url} />
                         </Link>
                         <div className="details">
                             <Link
@@ -94,7 +94,7 @@ const Post = ({ post }) => {
                 </div>
                 <div className="content">
                     <p>{post.desc}</p>
-                    {/* <img src={post.img} alt={post.img} /> */}
+                    <img src={post.images?.url} alt={post.images?.url} />
                 </div>
                 <div className="info">
                     <div className="item">
