@@ -31,7 +31,7 @@ const UpdateStories = ({ setOpenUpdate, setStories }) => {
             }
     }
     return (
-        <div className="update">
+        <div className="update-stories">
             <div className="wrapper">
                 <h1>Updoad Story</h1>
                 <form onSubmit={handleUpdate}>

@@ -55,7 +55,6 @@ exports.updateUser = catchAsyncErrors(async (req, res, next) => {
                 url: myCloud.secure_url
             }
 
-            await user.save();
         }
 
         if (image.fieldname === "coverPic") {
@@ -75,13 +74,12 @@ exports.updateUser = catchAsyncErrors(async (req, res, next) => {
                 url: myCloud.secure_url
             }
 
-            await user.save();
         }
 
         return;
     }))
 
-
+    await user.save();
     res.status(200).json({
         success: true,
         user

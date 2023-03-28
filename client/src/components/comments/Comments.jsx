@@ -11,6 +11,7 @@ const Comments = ({ postId }) => {
     const { user } = useSelector(state => state.userState);
     const [comments, setComments] = useState([]);
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -34,12 +35,15 @@ const Comments = ({ postId }) => {
         if (desc.length < 1) return dispatch(setError("Please add description"));
 
         try {
+            setIsLoading(true);
             const { data } = await axios.post(process.env.REACT_APP_API_URL + `/api/v1/post/${postId}/comment`, {desc}, { withCredentials: true });
 
-            setComments(data.comments);
             setDesc("")
+            setComments(data.comments);
+            setIsLoading(false);
         } catch (err) {
-            dispatch(setError(err.response.data.message))
+            dispatch(setError(err.response.data.message));
+            setIsLoading(false);
         }
     };
 
@@ -55,7 +59,7 @@ const Comments = ({ postId }) => {
                     value={desc}
                     onChange={(e) => setDesc(e.target.value)}
                 />
-                <button onClick={addComment}>Comment</button>
+                <button onClick={addComment} disabled={isLoading}>Comment</button>
             </div>
             {comments?.map((comment) => (
                 <div className="comment" key={comment._id}>

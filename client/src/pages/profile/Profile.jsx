@@ -121,11 +121,11 @@ const Profile = () => {
                                         <div className="info">
                                             <div className="item">
                                                 <PlaceIcon />
-                                                <span>{user?.city}</span>
+                                                <p>{user?.city}</p>
                                             </div>
                                             <div className="item">
                                                 <LanguageIcon />
-                                                <span>{user?.website}</span>
+                                                <p>{user?.website}</p>
                                             </div>
                                         </div>
                                         {ownUser?._id === user?._id ? (

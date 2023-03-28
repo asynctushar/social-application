@@ -10,8 +10,17 @@
         color: themed("textColor");
         margin-bottom: 20px;
 
+        @include mobile {
+            margin-bottom: 10px;
+        }
+
         .container {
             padding: 20px;
+
+            @include mobile {
+                padding: 15px;
+            }
+
             .top {
                 display: flex;
                 align-items: center;
@@ -65,6 +74,10 @@
                     display: flex;
                     align-items: center;
                     gap: 20px;
+
+                    @include mobile{
+                        gap: 0;
+                      }
 
                     .item {
                         display: flex;

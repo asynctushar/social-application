@@ -2,7 +2,7 @@ import "./share.scss";
 import Image from "../../assets/img.png";
 import Map from "../../assets/map.png";
 import Friend from "../../assets/friend.png";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -14,8 +14,9 @@ const Share = () => {
     const [file, setFile] = useState(null);
     const { user } = useSelector(state => state.userState);
     const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false)
-
+    const [isLoading, setIsLoading] = useState(false);
+    const fileRef = useRef();
+    
     const handleClick = async (e) => {
         e.preventDefault();
         if (desc.length < 1) return dispatch(setError("Please add post description"));
@@ -27,10 +28,13 @@ const Share = () => {
             formData.append('post', file);
         }
 
+
         try {
             setIsLoading(true)
             const { data } = await axios.post(process.env.REACT_APP_API_URL + "/api/v1/post/new", formData, { headers: { "Content-Type": "multipart/form-data" }, withCredentials: true });
-
+            setDesc("");
+            fileRef.current.value = '';
+            setFile(null);
             dispatch(setPost(data.post));
             setIsLoading(false)
         } catch (err) {
@@ -53,6 +57,7 @@ const Share = () => {
                             placeholder={`What's on your mind ${user?.name}?`}
                             onChange={(e) => setDesc(e.target.value)}
                             value={desc}
+                            ref={fileRef}
                         />
                     </div>
                     <div className="right">
@@ -71,6 +76,7 @@ const Share = () => {
                             style={{ display: "none" }}
                             accept="image/*"
                             onChange={(e) => setFile(e.target.files[0])}
+
                         />
                         <label htmlFor="file">
                             <div className="item">

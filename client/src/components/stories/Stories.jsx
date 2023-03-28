@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import UpdateStories from "../updateStories/UpdateStories";
 import { setError } from "../../redux/slices/appSlice";
 import axios from "axios";
+import Card from '@mui/joy/Card';
+import AspectRatio from '@mui/joy/AspectRatio';
+import Box from '@mui/joy/Box';
+import Typography from '@mui/joy/Typography';
 
 const Stories = () => {
     const { user } = useSelector(state => state.userState);
@@ -27,16 +31,25 @@ const Stories = () => {
 
     return (
         <div className="stories">
-            <div className="story">
+            <Card
+                orientation="horizontal"
+                variant="solid"
+                className="story"
+            >
                 <img src={user.coverPic?.url} alt={user.coverPic?.url} />
                 <span>{user.name}</span>
                 <button onClick={() => setOpenUpdate(true)}>+</button>
-            </div>
-            {stories?.map((story) => (
-                <div className="story" key={story?._id}>
+            </Card>
+            {stories && [...stories].reverse().map((story) => (
+                <Card
+                    orientation="horizontal"
+                    key={story._id}
+                    variant="solid"
+                    className="story"
+                >
                     <img src={story.image?.url} alt={story.image?.url} />
                     <span>{story.userId?.name}</span>
-                </div>
+                </Card>
             ))}
             {openUpdate && <UpdateStories setOpenUpdate={setOpenUpdate} setStories={setStories} />}
 

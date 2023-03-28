@@ -30,7 +30,6 @@ function App() {
                 dispatch(setIsAuthenticated(true))
                 dispatch(setLoader(false));
             } catch (err) {
-                dispatch(setError(err.response.data.message));
                 dispatch(setLoader(false))
             }
         }

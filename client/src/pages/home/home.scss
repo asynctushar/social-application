@@ -6,12 +6,13 @@
     background-color: themed("bgSoft");
     min-height: 100vh;
 
-    @include mobile {
-      padding: 10px;
-    }
-
+    
     @include tablet{
-      padding: 20px;
+        padding: 20px;
+    }
+    
+    @include mobile {
+      padding: 0px;
     }
   }
  }

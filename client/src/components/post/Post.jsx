@@ -20,6 +20,7 @@ const Post = ({ post }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const { user } = useSelector(state => state.userState);
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -38,32 +39,45 @@ const Post = ({ post }) => {
     }, []);
 
     const addLike = async () => {
+        if (isLoading) return;
+
         try {
+            setIsLoading(true);
             const { data } = await axios.post(process.env.REACT_APP_API_URL + `/api/v1/post/${post._id}/like`, {}, { withCredentials: true });
 
             setLikes(data.likes);
+            setIsLoading(false)
         } catch (err) {
-            dispatch(setError(err.response.data.message))
+            dispatch(setError(err.response.data.message));
+            setIsLoading(false)
         }
     };
 
     const removeLike = async () => {
+        if (isLoading) return;
+
         try {
+            setIsLoading(true);
             const { data } = await axios.delete(process.env.REACT_APP_API_URL + `/api/v1/post/${post._id}/like`, { withCredentials: true });
 
             setLikes(data.likes);
+            setIsLoading(false);
         } catch (err) {
-            dispatch(setError(err.response.data.message))
+            dispatch(setError(err.response.data.message));
+            setIsLoading(false);
         }
     };
 
     const deletePost = async () => {
         try {
+            setIsLoading(true);
             await axios.delete(process.env.REACT_APP_API_URL + `/api/v1/post/${post._id}`, { withCredentials: true });
 
-            dispatch(removePost(post._id))
+            dispatch(removePost(post._id));
+            setIsLoading(false);
         } catch (err) {
-            dispatch(setError(err.response.data.message))
+            dispatch(setError(err.response.data.message));
+            setIsLoading(false);
         }
     };
 
@@ -89,7 +103,7 @@ const Post = ({ post }) => {
                     </div>
                     <MoreHorizIcon onClick={() => setMenuOpen(!menuOpen)} />
                     {menuOpen && post.userId._id === user._id && (
-                        <button onClick={deletePost}>delete</button>
+                        <button disabled={isLoading} onClick={deletePost}>delete</button>
                     )}
                 </div>
                 <div className="content">
