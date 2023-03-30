@@ -4,7 +4,7 @@ const ErrorHandler = require('../utils/errorHandler');
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 30000000
+        fileSize: 300000000
     },
     fileFilter: (req, file, cb) => {
 

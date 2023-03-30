@@ -34,7 +34,6 @@ exports.updateUser = catchAsyncErrors(async (req, res, next) => {
 
     if (password) {
         user.password = password;
-        await user.save();
     }
 
     await Promise.all(images.map(async (image) => {

@@ -5,9 +5,6 @@ import UpdateStories from "../updateStories/UpdateStories";
 import { setError } from "../../redux/slices/appSlice";
 import axios from "axios";
 import Card from '@mui/joy/Card';
-import AspectRatio from '@mui/joy/AspectRatio';
-import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
 
 const Stories = () => {
     const { user } = useSelector(state => state.userState);
