@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from '../../redux/slices/userSlice';
 import { setError } from "../../redux/slices/appSlice";
 
-const Update = ({ setOpenUpdate, user }) => {
+const Update = ({ setOpenUpdate, user, isOpen }) => {
     const [cover, setCover] = useState("");
     const [profile, setProfile] = useState("");
     const [name, setName] = useState("");
