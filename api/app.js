@@ -30,7 +30,6 @@ app.use(cors({
     origin: process.env.FRONTEND_URL,
     optionsSuccessStatus: 204,
     credentials: true,
-    preflightContinue: true,
 }))
 
 app.use("/api/v1", authRoutes);
